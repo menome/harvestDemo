@@ -1,8 +1,27 @@
 # Menome Harvest Demo
 
-This demo illustrates the Menome Data Atomization pattern. It includes an example of the CSV harvester bot which takes a model and a CSV file, and atomizes the CSV file into a neo4j graph 
+This demo illustrates the Menome Data Atomization pattern. It includes an example of the CSV harvester bot which takes a model and a CSV file, and atomizes the CSV file into a neo4j graph.
 
-## CSV Harvesting Pattern
+For details regarding the Menome Data Atomization pattern, please refer to the youtube video and associated presentation: 
+* [Menome Data Atomization Harvester Pattern](http://www.menome.com/var/www/html/files/171202-5_menome_data_atomization.pdf)
+* [Menome Presentation on Data Atomization to Neo4j Developer Communtiy](https://www.youtube.com/watch?v=sZhQMeP6Al4)
+
+## Running the Demo:
+
+In order to run the demo:
+* Clone the repository
+* Open a terminal window and go into the HarvestDemo sub-dir
+* docker-compose up to start the Menome Knowledge Infastructure
+* Query the harvest endpoint to find out the CSV Bot Capabities using Postman or equivalent: [http://localhost:3021](http://localhost:3021)
+* Trigger the CSV Harvest process by Posting to the CSV Harvester endpoint using Postman or eqivalent. Using the defaults will trigger the base example model. Other files/models can be harvested by setting paratmers on post. 
+
+![harvest](csvHarvesterPostMessage.png)
+
+You can see the messages flowing through the from the CSV Harvester into the RabbitMQ instance using the RabbitMQ Manager located at : [http://localhost:15672/#/](http://localhost:15672/#/ ). Refinery messages will appear in the terminal window. 
+
+You can inspect the neo4j graph as the Menome Data Refinery builds the model from messages by using the Neo4j Browser: [http://localhost:7474](http://localhost:7474). The database will initially be blank, and then gradually build out to fully represente the CSV data file as per the model definition as messages are recieved and processed. 
+
+## CSV Harvesting Pattern Details
 
 There are several key components to the CSV harvesting pattern:
 
@@ -11,9 +30,7 @@ There are several key components to the CSV harvesting pattern:
 - RabbitMQ - while the Menome BotFramework can use other messaging systems such as Kafka, for the purposes of CSV files we have found that RabbitMQ is the easiest to work with, most lightweight, and simplest of these to setup. Menome uses a standard RabbitMQ container, which the BotFramework initializes automatically using an internal configuraiton process. 
 - DataRefinery - The Menome Data Refinery is at the heart of the Menome Data Atomization pattern. The DataRefinery connects to the RabbitMQ instance and waits for Menome Data Atoms to arrive on the Refinery Queue. The refinery uses these messages to generate Nodes and Relationships automatically the Neo4j instance. 
 
-The pattern for the CSV demo: 
-
-### Example Model
+## The Data Atomization Message Mapping Pattern
 
 The Menome BotFramework can harvest data from virutally any source including REST, Soap, SQL, noSQL. The harvesting functions vary a bit depending on the source, but the model structure for each of these sources remains consistent. 
 
@@ -21,7 +38,7 @@ The BotFramework transform function is a simple mapping pattern that delivers an
 
 The model is composed of two primary element: Node and Connections to the Node. 
 
-### Data Subject 
+### Data Subject/Entity 
 
 The Data Subject corresponds to the Node in the graph database. 
 
@@ -56,8 +73,6 @@ Connections are first degree relationships to the specific Node.
 
 
 
-
-
 ```
 {
       "Name": itm.name,
@@ -89,7 +104,7 @@ Connections are first degree relationships to the specific Node.
     }
 ```
 
-- transform functions - the bot framework can d
+- transform functions - the bot framework can 
 
 ### Data Atom Message: 
 
@@ -123,15 +138,5 @@ Model transform functions should return a JSON object with the following structu
         }
       ]
     }
-
-## Setting Up Demo
-
-A sample CSV file and Model are provided, but any CSV file or model can be used. 
-
-
-### CSV-Extractor Bot
-
-send it a path, library, and model and it will extract all data atoms out of the csv using the model
-LibraryPath = 'local' means that the file is in the local directory and librarian is not needed
 
 
