@@ -1,0 +1,75 @@
+version: '3.7'
+services:
+
+  ####################################
+  # Begin Fixtures
+  ####################################
+  neo4j:
+    image: menome/thelink-neo4j-main
+    # build: fixtures/neo4j
+    ports:
+      - "7473:7473"   # web interface (SSL)
+      - "7474:7474"   # web interface
+      - "7687:7687"   # bolt
+    environment:
+      - NEO4J_apoc_export_file_enabled=yes
+      - NEO4J_apoc_import_file_enabled=yes
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,algo.*
+      - NEO4J_dbms_security_procedures_whitelist=apoc.*,algo.*  
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_AUTH=neo4j/password
+    volumes:
+      - ./mounts/neo4j/data:/var/lib/neo4j/data # Data Mount
+      - ./mounts/neo4j/import:/var/lib/neo4j/import
+
+  rabbitmq:
+    image: rabbitmq:3.7.8-management
+    ports:
+      - "15672:15672"   # web management interface
+      - "5672:5672"     # amqp
+    environment:
+      RABBITMQ_ERLANG_COOKIE: SWQOKODSQALRPCLNMEQG
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
+  ####################################
+  # End Fixtures
+  ####################################
+
+  ####################################
+  # Begin Bots
+  ####################################
+
+  datarefinery:
+    image: menome/datarefinery
+    links:
+      - rabbitmq
+    environment:
+      - NODE_ENV=production
+      - INFER_DATES=true
+      - NEO4J_USER=neo4j
+      - NEO4J_PASS=password
+      - NEO4J_URL=bolt://neo4j:7687
+      - RABBIT_URL=amqp://rabbitmq:rabbitmq@rabbitmq:5672?heartbeat=3600
+
+
+  csvharvester:
+    image: menome/csv_harvester
+    links:
+      - rabbitmq
+    environment:
+      - NODE_ENV=development
+      - RABBIT_OUTGOING_URL=amqp://rabbitmq:rabbitmq@rabbitmq:5672?heartbeat=3600
+    ports: 
+      - 3021:80
+    volumes:
+      - ./models:/srv/app/models
+      - ./local:/srv/app/local
+
+  ####################################
+  # End Bots
+  ####################################
+
+  ####################################
+  # Begin Customer Facing
+  ####################################
+
