@@ -21,6 +21,12 @@ You can see the messages flowing through the from the CSV Harvester into the Rab
 
 You can inspect the neo4j graph as the Menome Data Refinery builds the model from messages by using the Neo4j Browser: [http://localhost:7474](http://localhost:7474). The database will initially be blank, and then gradually build out to fully represente the CSV data file as per the model definition as messages are recieved and processed. 
 
+Schema:
+![harvest](graphSchema.png)
+
+Graph Pattern:
+![harvest](graph.png)
+
 ## CSV Harvesting Pattern Details
 
 There are several key components to the CSV harvesting pattern:
