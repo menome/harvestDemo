@@ -110,7 +110,9 @@ Connections are first degree relationships to the specific Node.
     }
 ```
 
-- transform functions - the bot framework can 
+### transform functions
+
+The bot framework also has a set of built-in transform functions although 
 
 ### Data Atom Message: 
 
