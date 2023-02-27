@@ -148,3 +148,12 @@ Model transform functions should return a JSON object with the following structu
     }
 
 
+## NOTE 
+
+For this to work currently with the message-server container, the default messageserver_exchange must be manually removed and re-created in the rabbitmq admin console. 
+
+This is because there is an error in the message-server where it is not setting the correct routing key in the binding. 
+
+The *messageserver* Routing Key must be manually added by unbinding the devault messageserver_exchange binding, and then creating a new messageserver_exchange binding with a *messageserver* routing key:
+
+![Message Server manual binding](messageserver_rmq_binding.jpg)

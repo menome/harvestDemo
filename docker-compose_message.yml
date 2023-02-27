@@ -5,7 +5,7 @@ services:
   # Begin Fixtures
   ####################################
   neo4j:
-    image: menome/thelink-neo4j-main:version-3.5.3
+    image: menome/thelink-neo4j-main:latest
     # build: fixtures/neo4j
     ports:
       - "7473:7473"   # web interface (SSL)
@@ -42,28 +42,38 @@ services:
   # Begin Bots
   ####################################
 
-  datarefinery:
-    image: menome/datarefinery:version-1.3.3
+  message-server:
+    image: menome/message-server:latest
+    ports:
+      - "8081:8081"
     links:
-      - rabbitmq
       - neo4j
+      - rabbitmq
     environment:
-      - NODE_ENV=production
-      - INFER_DATES=true
+      - RABBITMQ_USER=rabbitmq
+      - RABBITMQ_QUEUE=messageserver
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PASSWORD=rabbitmq
       - NEO4J_USER=neo4j
-      - NEO4J_PASS=password
-      - NEO4J_ENCTRYPTED=false
-      - NEO4J_URL=bolt://neo4j:7687
-      - RABBIT_URL=amqp://rabbitmq:rabbitmq@rabbitmq:5672?heartbeat=3600
+      - NEO4J_PASSWORD=password
+      - NEO4J_HOST=bolt://neo4j
+      - HTTP_SERVER_PORT=8081
+      - RABBITMQ_BATCH_SIZE=5000
+      - SHOW_CONNECTION_LOG_OUTPUT=Y
+      - RABBITMQ_EXCHANGE=messageserver_exchange
 
 
   csvharvester:
-    image: menome/csv_harvester
+    image: menome/csv_harvester:latest
     links:
       - rabbitmq
     environment:
       - NODE_ENV=development
       - RABBIT_OUTGOING_URL=amqp://rabbitmq:rabbitmq@rabbitmq:5672?heartbeat=3600
+      - RABBIT_OUTGOING_ROUTING_KEY=messageserver
+      - RABBIT_OUTGOING_EXCHANGE=messageserver_exchange
+      - RABBIT_OUTGOING_EXCHANGE_TYPE=direct
+
     ports: 
       - 3021:80
     volumes:
